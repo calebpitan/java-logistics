@@ -4,12 +4,14 @@ import com.calebpitan.logistics.account.Account;
 import com.calebpitan.logistics.account.AccountRepository;
 import com.calebpitan.logistics.user.User;
 import com.calebpitan.logistics.user.UserRepository;
+import com.calebpitan.logistics.utils.security.JWTHelper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
   private final UserRepository userRepository;
   private final AccountRepository accountRepository;
+  private final JWTHelper jwtHelper;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
 
@@ -69,12 +72,12 @@ public class AuthService {
     accountRepository.save(account);
   }
 
-  public Authentication login(CredentialsLoginRequest request) {
+  public AuthenticationResult login(CredentialsLoginRequest request) {
     try {
       Authentication authentication = authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(request.identifier(), request.password()));
-      User user = (User) authentication.getPrincipal();
-      return authentication;
+      final UserDetails user = (UserDetails) authentication.getPrincipal();
+      return new AuthenticationResult(jwtHelper.generateToken(user), null);
     } catch (AuthenticationException e) {
       log.error("Error while authenticating user", e);
       throw e;

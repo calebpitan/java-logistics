@@ -25,11 +25,11 @@ public class AuthController {
   }
 
   @PostMapping("/credentials/login")
-  public ResponseEntity<Void> login(@Validated @RequestBody CredentialsLoginRequest request) {
+  public ResponseEntity<AuthenticationResult> login(@Validated @RequestBody CredentialsLoginRequest request) {
       log.info("Credentials login for user received {}", request);
       var result = authService.login(request);
       log.info("Login result {}", result);
-      return ResponseEntity.status(HttpStatus.OK).build();
+      return ResponseEntity.status(HttpStatus.OK).body(result);
   }
 
   @PostMapping("/magic-link/register")
