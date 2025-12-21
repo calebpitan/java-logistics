@@ -25,10 +25,11 @@ public class JWTAuthTokenFilter extends OncePerRequestFilter {
   @Autowired private JWTHelper jwtHelper;
   @Autowired private UserDetailsServiceImpl userDetailsService;
 
-  private Optional<String> parseJwt(HttpServletRequest request) {
+  private Optional<String> getAuthorizationBearer(HttpServletRequest request) {
     final String authorizationHeader = request.getHeader("Authorization");
 
     if (authorizationHeader == null || !authorizationHeader.startsWith(AUTH_SCHEME)) {
+      log.info("Cannot parse JWT: Authorization header is either missing or has a wrong scheme");
       return Optional.empty();
     }
 
@@ -42,12 +43,12 @@ public class JWTAuthTokenFilter extends OncePerRequestFilter {
       @NonNull FilterChain filterChain)
       throws ServletException, IOException {
     try {
-      this.parseJwt(request)
+      getAuthorizationBearer(request)
           .ifPresent(
               (token) -> {
-                if (!this.jwtHelper.isValidToken(token)) return;
+                if (!jwtHelper.isValidToken(token)) return;
 
-                final String userIdentifier = this.jwtHelper.getUserFromToken(token);
+                final String userIdentifier = jwtHelper.getIdentifierFromToken(token);
                 final UserDetails userDetails =
                     userDetailsService.loadUserByUsername(userIdentifier);
 

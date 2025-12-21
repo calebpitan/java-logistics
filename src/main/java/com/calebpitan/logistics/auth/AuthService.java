@@ -79,7 +79,7 @@ public class AuthService {
       final UserDetails user = (UserDetails) authentication.getPrincipal();
       return new AuthenticationResult(jwtHelper.generateToken(user), null);
     } catch (AuthenticationException e) {
-      log.error("Error while authenticating user", e);
+      log.error("Error while authenticating user: {}", e.getMessage());
       throw e;
     }
   }

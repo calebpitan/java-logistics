@@ -27,21 +27,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         .authorities(user.getAuthorities())
         .build();
   }
-
-  public UserDetails loadUserByUsername(Long id) throws UsernameNotFoundException {
-    User user =
-        userRepository
-            .findById(id)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-    String password =
-        user.getAccountPassword()
-            .orElseThrow(() -> new UsernameNotFoundException("Cannot authenticate with password"));
-
-    return org.springframework.security.core.userdetails.User.builder()
-        .username(user.getEmail())
-        .password(password)
-        .authorities(user.getAuthorities())
-        .build();
-  }
 }

@@ -1,6 +1,5 @@
 package com.calebpitan.logistics.utils.security;
 
-import com.calebpitan.logistics.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -47,20 +46,20 @@ public class JWTHelper {
   }
 
   @Nullable
-  public String getUserFromToken(String token) {
-      Claims payload = Jwts.parser().verifyWith(this.key).build().parseSignedClaims(token).getPayload();
-      String userIdentifier = payload.getSubject();
+  public String getIdentifierFromToken(String token) {
+    Claims payload =
+        Jwts.parser().verifyWith(this.key).build().parseSignedClaims(token).getPayload();
 
-      return userIdentifier;
+    return payload.getSubject();
   }
 
   public boolean isValidToken(String token) {
-      try {
-          Jwts.parser().verifyWith(this.key).build().parseSignedClaims(token);
-           return true;
-      } catch (Exception e) {
-          log.error("Invalid JWT token: {}", e.getMessage());
-          return false;
-      }
+    try {
+      Jwts.parser().verifyWith(this.key).build().parseSignedClaims(token);
+      return true;
+    } catch (Exception e) {
+      log.error("Invalid JWT token: {}", e.getMessage());
+      return false;
+    }
   }
 }

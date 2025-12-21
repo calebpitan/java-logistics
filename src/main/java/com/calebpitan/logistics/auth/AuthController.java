@@ -26,9 +26,7 @@ public class AuthController {
 
   @PostMapping("/credentials/login")
   public ResponseEntity<AuthenticationResult> login(@Validated @RequestBody CredentialsLoginRequest request) {
-      log.info("Credentials login for user received {}", request);
-      var result = authService.login(request);
-      log.info("Login result {}", result);
+      AuthenticationResult result = authService.login(request);
       return ResponseEntity.status(HttpStatus.OK).body(result);
   }
 
