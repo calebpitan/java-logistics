@@ -1,6 +1,8 @@
 package com.calebpitan.logistics;
 
 import com.calebpitan.logistics.user.UserDetailsServiceImpl;
+import com.calebpitan.logistics.utils.security.JWTAuthEntryPoint;
+import com.calebpitan.logistics.utils.security.JWTAuthTokenFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @AllArgsConstructor
 @Configuration
@@ -22,10 +25,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
   private final UserDetailsServiceImpl userDetailsService;
+  private final JWTAuthEntryPoint jwtUnauthorizedHandler;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public JWTAuthTokenFilter jwtAuthTokenFilter() {
+    return new JWTAuthTokenFilter();
   }
 
   @Bean
@@ -34,6 +43,7 @@ public class SecurityConfig {
     return httpSecurity
         .cors(AbstractHttpConfigurer::disable)
         .csrf(AbstractHttpConfigurer::disable)
+        .exceptionHandling(e -> e.authenticationEntryPoint(jwtUnauthorizedHandler))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
@@ -44,6 +54,7 @@ public class SecurityConfig {
                     .permitAll()
                     .anyRequest()
                     .authenticated())
+        .addFilterBefore(jwtAuthTokenFilter(), UsernamePasswordAuthenticationFilter.class)
         .authenticationManager(authenticationManager)
         .build();
   }
